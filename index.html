@@ -1985,6 +1985,12 @@ input::placeholder,textarea::placeholder{color:#607065 !important;opacity:1 !imp
 .kopya-korumali img{-webkit-user-drag:none !important;pointer-events:none}
 .kopya-korumali ::selection{background:transparent !important;color:inherit !important}
 .kopya-korumali ::-moz-selection{background:transparent !important}
+/* DELİK BURADAYDI: input / textarea kutuları parent kilidini dinlemez, o yüzden kutunun kendisini kilitle */
+.kopya-korumali input, .kopya-korumali textarea, .kopya-korumali select{
+  user-select:none !important;-webkit-user-select:none !important;-webkit-touch-callout:none !important;
+  pointer-events:none !important;caret-color:transparent !important;
+}
+.kopya-korumali input::selection, .kopya-korumali textarea::selection{background:transparent !important}
 </style>
 </head>
 <body>
@@ -2028,11 +2034,15 @@ Yürüme basamakları oyun içinde, bütün olarak ve kesilmeden uygulandı. Ö�
     }catch(_){}
     return false;
   }
-  ['copy','cut','contextmenu','selectstart','dragstart'].forEach(function(ev){
+  ['copy','cut','contextmenu','selectstart','dragstart','select','focusin'].forEach(function(ev){
     document.addEventListener(ev, function(e){
       if(icinde(e)){ e.preventDefault(); e.stopPropagation(); if(e.type==='copy'||e.type==='cut'){ try{ e.clipboardData && e.clipboardData.setData('text/plain',''); }catch(_){} } return false; }
     }, true);
   });
+  document.addEventListener('focusin', function(e){
+    var el = e.target;
+    while(el){ if(el.classList && el.classList.contains('kopya-korumali')){ try{ el.blur && el.blur(); }catch(_){} if(e.target && e.target.blur) e.target.blur(); e.preventDefault(); return false; } el = el.parentElement; }
+  }, true);
   document.addEventListener('keydown', function(e){
     if((e.ctrlKey||e.metaKey) && ['a','c','x','p','s'].indexOf((e.key||'').toLowerCase())>=0 && icinde(e)){
       e.preventDefault(); e.stopPropagation(); return false;
